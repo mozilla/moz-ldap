@@ -10,5 +10,6 @@ from . import views
 urlpatterns = patterns('',
     url(r'^$', views.home, name='home'),
     url(r'^exists/?$', views.exists, name='exists'),
-#    url(r'^in/?$', views.in_group, name='in'),
+    url(r'^employee/?$', views.employee, name='employee'),
+    url(r'^in-group/?$', views.in_group, name='in-group'),
 )
