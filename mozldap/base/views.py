@@ -71,7 +71,7 @@ def exists(request):
     for uid, result in rs:
         return dict(result)
 
-    raise http.Http404('Not found')
+    return http.HttpResponse('', status=204)
 
 
 def _make_search_filter(data, any_parameter=False):
@@ -119,7 +119,7 @@ def employee(request):
     for uid, result in rs:
         return dict(result)
 
-    raise http.Http404('Not found')
+    return http.HttpResponse('', status=204)
 
 
 def in_group(request):
@@ -151,7 +151,7 @@ def in_group(request):
         break
 
     if not uid:
-        raise http.Http404('Not found')
+        return http.HttpResponse('', status=204)
 
     search_filter1 = _make_search_filter(dict(cn=cn))
     # : (|(memberuid=$uid)(memberuid=$mail)(member=mail=$mail,o=com,dc=mozilla)(member=mail=$mail,o=org,dc=mozilla)\
@@ -175,4 +175,4 @@ def in_group(request):
         #print result
         return http.HttpResponse('OK\n', mimetype='text/plain')
 
-    raise http.Http404('Not found')
+    return http.HttpResponse('', status=204)

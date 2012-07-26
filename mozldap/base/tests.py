@@ -64,12 +64,13 @@ class ViewsTestCase(TestCase):
         eq_(json.dumps(result['abc123']).strip(), response.content.strip())
 
         response = self.client.get(url, {'mail': 'never@heard.of.com'})
-        eq_(response.status_code, 404)
-        ok_('text/plain' in response['Content-Type'])
+        eq_(response.status_code, 204)
+        eq_(response.content, '')
 
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'hgaccountenabled': ''})
-        eq_(response.status_code, 404)
+        eq_(response.status_code, 204)
+        eq_(response.content, '')
 
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'gender': 'male'})
@@ -102,8 +103,8 @@ class ViewsTestCase(TestCase):
         eq_(json.dumps(result['abc123']).strip(), response.content.strip())
 
         response = self.client.get(url, {'mail': 'never@heard.of.com'})
-        eq_(response.status_code, 404)
-        ok_('text/plain' in response['Content-Type'])
+        eq_(response.status_code, 204)
+        eq_(response.content, '')
 
     def test_in_group(self):
         url = reverse('in-group')
@@ -140,3 +141,8 @@ class ViewsTestCase(TestCase):
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'cn': 'CrashStats'})
         eq_(response.status_code, 200)
+
+        response = self.client.get(url, {'mail': 'peter@example.com',
+                                         'cn': 'NotInGroup'})
+        eq_(response.status_code, 204)
+        eq_(response.content, '')
