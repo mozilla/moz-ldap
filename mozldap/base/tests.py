@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import json
-import ldap
+#import ldap
 import mock
 from nose.tools import eq_, ok_
 from django.conf import settings
@@ -46,8 +46,9 @@ class ViewsTestCase(TestCase):
         eq_(response.status_code, 400)
 
         result = {
-          'abc123': {'uid': 'abc123', 'mail': 'peter@example.com'},
+            'abc123': {'uid': 'abc123', 'mail': 'peter@example.com'},
         }
+
         def search_s(base, scope, filterstr, *args, **kwargs):
             if 'peter@example.com' in filterstr:
                 if 'hgaccountenabled=true' in filterstr:
@@ -66,10 +67,12 @@ class ViewsTestCase(TestCase):
         eq_(response.status_code, 404)
         ok_('text/plain' in response['Content-Type'])
 
-        response = self.client.get(url, {'mail': 'peter@example.com', 'hgaccountenabled': ''})
+        response = self.client.get(url, {'mail': 'peter@example.com',
+                                         'hgaccountenabled': ''})
         eq_(response.status_code, 404)
 
-        response = self.client.get(url, {'mail': 'peter@example.com', 'gender': 'male'})
+        response = self.client.get(url, {'mail': 'peter@example.com',
+                                         'gender': 'male'})
         eq_(response.status_code, 200)
 
     def test_employee(self):
@@ -81,10 +84,11 @@ class ViewsTestCase(TestCase):
         eq_(response.status_code, 400)
 
         result = {
-          'abc123': {'uid': 'abc123',
-                     'mail': 'peter@mozilla.com',
-                     'sn': u'B\xe3ngtsson'},
+            'abc123': {'uid': 'abc123',
+                       'mail': 'peter@mozilla.com',
+                       'sn': u'B\xe3ngtsson'},
         }
+
         def search_s(base, scope, filterstr, *args, **kwargs):
             if 'peter@example.com' in filterstr:
                 return result.items()
@@ -112,28 +116,27 @@ class ViewsTestCase(TestCase):
         response = self.client.get(url, {'mail': 'peter@example.com'})
         eq_(response.status_code, 400)
 
-        response = self.client.get(url, {'mail': 'peter@example.com', 'cn': ''})
+        response = self.client.get(url, {'mail': 'peter@example.com',
+                                         'cn': ''})
         eq_(response.status_code, 400)
 
         result = {
-          'abc123': {'uid': 'abc123', 'mail': 'peter@example.com'},
+            'abc123': {'uid': 'abc123', 'mail': 'peter@example.com'},
         }
+
         def search_s(base, scope, filterstr, *args, **kwargs):
-            print (base, scope, filterstr)
             if 'ou=groups' in base:
-                if 'peter@example.com' in filterstr and 'cn=CrashStats' in filterstr:
+                if ('peter@example.com' in filterstr and
+                    'cn=CrashStats' in filterstr):
                     return result.items()
             else:
                 # basic lookup
                 if 'peter@example.com' in filterstr:
                     return result.items()
-            #if 'peter@example.com' in filterstr:
-            #    if 'hgaccountenabled=true' in filterstr:
-            #        return []
-            #    return result.items()
             return []
 
         self.connection.search_s = mock.MagicMock(side_effect=search_s)
 
-        response = self.client.get(url, {'mail': 'peter@example.com', 'cn': 'CrashStats'})
+        response = self.client.get(url, {'mail': 'peter@example.com',
+                                         'cn': 'CrashStats'})
         eq_(response.status_code, 200)

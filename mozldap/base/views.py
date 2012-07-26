@@ -18,9 +18,12 @@ def json_view(f):
         if isinstance(response, http.HttpResponse):
             return response
         else:
-            return http.HttpResponse(_json_clean(json.dumps(response)),
-                                content_type='application/json; charset=UTF-8')
+            return http.HttpResponse(
+                _json_clean(json.dumps(response)),
+                content_type='application/json; charset=UTF-8'
+            )
     return wrapper
+
 
 def _json_clean(value):
     """JSON-encodes the given Python object."""
@@ -42,8 +45,6 @@ def home(request):
     return http.HttpResponse('Yada yada yada\nDocumentation...')
 
 
-
-
 @json_view
 def exists(request):
     mail = request.GET.get('mail')
@@ -62,10 +63,10 @@ def exists(request):
     search_filter = _make_search_filter(request.GET)
 
     rs = connection.search_s(
-      "dc=mozilla",
-      ldap.SCOPE_SUBTREE,
-      search_filter,
-      attrs
+        "dc=mozilla",
+        ldap.SCOPE_SUBTREE,
+        search_filter,
+        attrs
     )
     for uid, result in rs:
         return dict(result)
@@ -110,10 +111,10 @@ def employee(request):
     search_filter = _make_search_filter(dict(request_data,
                                              objectClass='mozComPerson'))
     rs = connection.search_s(
-      "dc=mozilla",
-      ldap.SCOPE_SUBTREE,
-      search_filter,
-      attrs
+        "dc=mozilla",
+        ldap.SCOPE_SUBTREE,
+        search_filter,
+        attrs
     )
     for uid, result in rs:
         return dict(result)
@@ -140,10 +141,10 @@ def in_group(request):
     # first, figure out the uid
     search_filter = _make_search_filter(dict(mail=mail))
     rs = connection.search_s(
-      "dc=mozilla",
-      ldap.SCOPE_SUBTREE,
-      search_filter,
-      ['uid']
+        "dc=mozilla",
+        ldap.SCOPE_SUBTREE,
+        search_filter,
+        ['uid']
     )
     uid = None
     for uid, result in rs:
@@ -152,29 +153,26 @@ def in_group(request):
     if not uid:
         raise http.Http404('Not found')
 
-    #attrs = ['uid', 'cn', 'sn', 'mail', 'givenName']
     search_filter1 = _make_search_filter(dict(cn=cn))
     # : (|(memberuid=$uid)(memberuid=$mail)(member=mail=$mail,o=com,dc=mozilla)(member=mail=$mail,o=org,dc=mozilla)\
     #     (member=mail=$mail,o=net,dc=mozillacom))
     search_filter2 = _make_search_filter({
-      'memberUid': [uid, mail],  # should that me 'memberuid' ??
-      'member': ['mail=%s,o=com,dc=mozilla' % mail,
-                 'mail=%s,o=org,dc=mozilla' % mail,
-                 'mail=%s,o=net,dc=mozillacom' % mail],
+        'memberUid': [uid, mail],  # should that me 'memberuid' ??
+        'member': ['mail=%s,o=com,dc=mozilla' % mail,
+                   'mail=%s,o=org,dc=mozilla' % mail,
+                   'mail=%s,o=net,dc=mozillacom' % mail],
     }, any_parameter=True)
-#    print search_filter1
-#    print search_filter2
     search_filter = '(&(%s)(%s))' % (search_filter1, search_filter2)
 
     rs = connection.search_s(
-      "ou=groups,dc=mozilla",
-      ldap.SCOPE_SUBTREE,
-      search_filter,
-      #attrs
+        "ou=groups,dc=mozilla",
+        ldap.SCOPE_SUBTREE,
+        search_filter,
+        #attrs
     )
 
     for uid, result in rs:
-        print result
+        #print result
         return http.HttpResponse('OK\n', mimetype='text/plain')
 
     raise http.Http404('Not found')
