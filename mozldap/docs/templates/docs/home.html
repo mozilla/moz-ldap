@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en-US" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+
+    <title>MozLDAP — Tool to test the MozLDAP REST API</title>
+<!--    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/css/bootstrap-combined.min.css" rel="stylesheet">-->
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+    .control-label { font-weight: bold; }
+    footer { margin-top: 50px; border-top: 1px solid #efefef; font-size: 90%; }
+    code, pre { background-color: #efefef; font-family: courier new, courier; padding: 3px; }
+    pre { font-size: 80%; }
+    </style>
+
+  </head>
+
+  <body>
+
+
+    <div class="container">
+
+      <h1>MozLDAP — Tool to test the MozLDAP REST API</h1>
+
+      <form xclass="form-horizontal">
+        <fieldset>
+          <div class="control-group">
+            <label class="control-label" for="mail">Mail</label>
+            <div class="controls">
+              <input class="input-xxlarge" id="mail" name="mail" type="text">
+              <p class="help-block">A mail address is always required</p>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="optionsCheckbox">Search type</label>
+            <div class="controls">
+              <label class="checkbox">
+                <input name="type" value="exists" type="radio" checked> Exists<br>
+              </label>
+              <label class="checkbox">
+                <input name="type" value="employee" type="radio"> Employee<br>
+              </label>
+              <label class="checkbox">
+                <input name="type" value="group" type="radio"> Group name:
+              </label>
+              <label class="checkbox">
+                <input name="cn" size="40">
+              </label>
+
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Run query</button>
+          </div>
+        </fieldset>
+      </form>
+
+
+    <div id="result" style="display:none">
+    <p>
+    <strong>URL:</strong>
+    <code id="url"></code>
+    </p>
+
+    <div id="response">
+      <strong>Status:</strong>
+      <code></code>
+      <br>
+      <strong>Response:</strong>
+      <pre>
+      </pre>
+    </div>
+    </div>
+
+    <footer>
+    <p><a href="https://github.com/peterbe/moz-ldap">Code for this</a></p>
+    </footer>
+
+    </div> <!-- /container -->
+
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script>
+$(function() {
+
+  $('input[name="cn"]').keyup(function() {
+    if ($(this).val() && !$('input[value="group"]:checked').size()) {
+      $('input[value="group"]')[0].checked = true;
+    }
+  });
+
+  $('form').submit(function() {
+    var mail = $.trim($('input[name="mail"]').val());
+    if (!mail.length) {
+      alert("A mail address is always required.");
+      return false;
+    }
+    var url;
+    var query = '?mail=' + encodeURI(mail);
+    if ($('input[name="cn"]').val()) {
+      url = '/in-group';
+      query += '&cn=' + $('input[name="cn"]').val();
+    } else if ($('input[name="employee"]:checked').size()) {
+      url = '/employee';
+    } else {
+      url = '/exists';
+    }
+    url += query;
+    $('#url').text(location.protocol + '//' + location.host + url);
+    $('#result:hidden').fadeIn(200);
+    $('#response pre').text('');
+    $('#response code').text('');
+    $.ajax({
+      url: url,
+      dataType: 'html',
+      error: function(jqXHR, textStatus, errorThrown) {
+        $('#response code').text(jqXHR.status);
+        $('#response pre').text(jqXHR.responseText);
+        $('#response').fadeIn(100);
+      },
+      success: function(data, textStatus, jqXHR) {
+        $('#response code').text(jqXHR.status);
+        $('#response pre').text(data);
+        $('#response').fadeIn(500);
+      }
+    });
+
+    return false;
+  });
+});
+</script>
+
+  </body>
+</html>

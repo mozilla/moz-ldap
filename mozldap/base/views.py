@@ -7,8 +7,9 @@ import functools
 import ldap
 from ldap.filter import filter_format
 from django import http
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.conf import settings
+from django.core.urlresolvers import reverse
 
 
 def json_view(f):
@@ -42,7 +43,7 @@ def handler404(request):
 
 
 def home(request):
-    return http.HttpResponse('Yada yada yada\nDocumentation...')
+    return redirect(reverse('docs-home'))
 
 
 @json_view
@@ -162,7 +163,8 @@ def in_group(request):
                    'mail=%s,o=org,dc=mozilla' % mail,
                    'mail=%s,o=net,dc=mozillacom' % mail],
     }, any_parameter=True)
-    search_filter = '(&(%s)(%s))' % (search_filter1, search_filter2)
+    search_filter = '(&%s%s)' % (search_filter1, search_filter2)
+    print search_filter
 
     rs = connection.search_s(
         "ou=groups,dc=mozilla",

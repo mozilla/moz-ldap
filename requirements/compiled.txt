@@ -1,1 +1,3 @@
-python-ldap
+python-ldap==2.4.10
+Jinja2==2.5.5
+

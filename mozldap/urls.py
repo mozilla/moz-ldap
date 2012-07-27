@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import patterns, include
 
-from .base import urls
+from .base import urls as base_urls
+from .docs import urls as docs_urls
 
 from funfactory.monkeypatches import patch
 patch()
@@ -8,7 +9,8 @@ patch()
 
 urlpatterns = patterns('',
     # Example:
-    (r'', include(urls)),
+    (r'', include(base_urls)),
+    (r'docs', include(docs_urls)),
 
 )
 

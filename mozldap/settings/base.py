@@ -19,17 +19,13 @@ ROOT_URLCONF = '%s.urls' % PROJECT_MODULE
 INSTALLED_APPS = (
     # Application base, containing global templates.
     '%s.base' % PROJECT_MODULE,
+    '%s.docs' % PROJECT_MODULE,
 )
-
-#LOCALE_PATHS = (
-#    os.path.join(ROOT, PROJECT_MODULE, 'locale'),
-#)
 
 # Because Jinja2 is the default template loader, add any non-Jinja templated
 # apps here:
 JINGO_EXCLUDE_APPS = [
-    'admin',
-    'registration',
+    'docs',
 ]
 
 # BrowserID configuration
