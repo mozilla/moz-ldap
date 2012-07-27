@@ -3,7 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import json
-#import ldap
 import mock
 from nose.tools import eq_, ok_
 from django.conf import settings
@@ -35,7 +34,7 @@ class ViewsTestCase(TestCase):
     def test_render_home_page(self):
         url = reverse('home')
         response = self.client.get(url)
-        eq_(response.status_code, 200)
+        eq_(response.status_code, 302)
 
     def test_exists(self):
         url = reverse('exists')
@@ -64,13 +63,13 @@ class ViewsTestCase(TestCase):
         eq_(json.dumps(result['abc123']).strip(), response.content.strip())
 
         response = self.client.get(url, {'mail': 'never@heard.of.com'})
-        eq_(response.status_code, 204)
-        eq_(response.content, '')
+        eq_(response.status_code, 200)
+        eq_(response.content, '{}')
 
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'hgaccountenabled': ''})
-        eq_(response.status_code, 204)
-        eq_(response.content, '')
+        eq_(response.status_code, 200)
+        eq_(response.content, '{}')
 
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'gender': 'male'})
@@ -103,8 +102,9 @@ class ViewsTestCase(TestCase):
         eq_(json.dumps(result['abc123']).strip(), response.content.strip())
 
         response = self.client.get(url, {'mail': 'never@heard.of.com'})
-        eq_(response.status_code, 204)
-        eq_(response.content, '')
+        eq_(response.status_code, 200)
+        eq_('application/json; charset=UTF-8', response['Content-Type'])
+        eq_(response.content, '{}')
 
     def test_in_group(self):
         url = reverse('in-group')
@@ -144,5 +144,5 @@ class ViewsTestCase(TestCase):
 
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'cn': 'NotInGroup'})
-        eq_(response.status_code, 204)
-        eq_(response.content, '')
+        eq_(response.status_code, 200)
+        eq_(response.content, '{}')

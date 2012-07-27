@@ -7,9 +7,10 @@ from django.conf.urls.defaults import patterns, url
 from . import views
 
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^$', views.home, name='home'),
-    url(r'^exists/?$', views.exists, name='exists'),
-    url(r'^employee/?$', views.employee, name='employee'),
-    url(r'^in-group/?$', views.in_group, name='in-group'),
+    url(r'^exists/?$', views.Exists.as_view(), name='exists'),
+    url(r'^employee/?$', views.Employee.as_view(), name='employee'),
+    url(r'^in-group/?$', views.InGroup.as_view(), name='in-group'),
 )
