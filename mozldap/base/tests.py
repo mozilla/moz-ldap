@@ -50,7 +50,7 @@ class ViewsTestCase(TestCase):
 
         def search_s(base, scope, filterstr, *args, **kwargs):
             if 'peter@example.com' in filterstr:
-                if 'hgaccountenabled=true' in filterstr:
+                if 'hgaccountenabled=TRUE' in filterstr:
                     return []
                 return result.items()
             return []
@@ -106,6 +106,12 @@ class ViewsTestCase(TestCase):
         eq_('application/json; charset=UTF-8', response['Content-Type'])
         eq_(response.content, '{}')
 
+    def test_general_page_not_found(self):
+        response = self.client.get('/notexistingurl')
+        eq_(response.status_code, 404)
+        ok_('notexistingurl' in response.content)
+        eq_(response['Content-Type'], 'text/plain')
+
     def test_in_group(self):
         url = reverse('in-group')
         response = self.client.get(url)
@@ -138,9 +144,15 @@ class ViewsTestCase(TestCase):
 
         self.connection.search_s = mock.MagicMock(side_effect=search_s)
 
+        response = self.client.get(url, {'mail': 'not@head.of.com',
+                                         'cn': 'CrashStats'})
+        eq_(response.status_code, 200)
+        eq_(response.content, '{}')
+
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'cn': 'CrashStats'})
         eq_(response.status_code, 200)
+        eq_(json.loads(response.content), {'group': 'OK'})
 
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'cn': 'NotInGroup'})

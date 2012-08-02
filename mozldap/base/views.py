@@ -26,7 +26,11 @@ def handler404(request):
 
 #====================================================================
 
+
 class BaseView(View):
+
+    # default attributes to return
+    attributes = ['uid', 'cn', 'sn', 'mail', 'givenName']
 
     @property
     def connection(self):
@@ -48,7 +52,7 @@ class BaseView(View):
                 value = [value]
             for v in value:
                 if not v:
-                    v = 'true'
+                    v = 'TRUE'
                 params.append(filter_format('(%s=%s)', (key, v)))
         search_filter = ''.join(params)
         if len(params) > 1:
@@ -64,16 +68,22 @@ class BaseView(View):
 @class_decorator(json_view)
 @class_decorator(required_parameters('mail'))
 class Exists(BaseView):
-
-    def get(self, request):
-        attrs = ['uid', 'cn', 'sn', 'mail', 'givenName']
-        search_filter = self.make_search_filter(request.GET)
+    def get(self, request, **search):
+        search = search or dict(request.GET.items())
+        mail = search.pop('mail')
+        search_filter = self.make_search_filter(
+            dict(mail=mail, emailAlias=mail),
+            any_parameter=True
+        )
+        if search:
+            other_filter = self.make_search_filter(search)
+            search_filter = '(&%s%s)' % (search_filter, other_filter)
 
         rs = self.connection.search_s(
             "dc=mozilla",
             ldap.SCOPE_SUBTREE,
             search_filter,
-            attrs
+            self.attributes
         )
         for uid, result in rs:
             return dict(result)
@@ -85,17 +95,23 @@ class Exists(BaseView):
 @class_decorator(required_parameters('mail'))
 class Employee(BaseView):
 
-    def get(self, request):
-        attrs = ['uid', 'cn', 'sn', 'mail', 'givenName']
-        request_data = dict(request.GET.items())
-        search_filter = self.make_search_filter(
-            dict(request_data, objectClass='mozComPerson')
+    def get(self, request, **search):
+        search = search or dict(request.GET.items())
+        mail = search.pop('mail')
+        mail_filter = self.make_search_filter(
+            dict(mail=mail, emailAlias=mail),
+            any_parameter=True
         )
+        other_filter = self.make_search_filter(
+            dict(search, objectClass='mozComPerson')
+        )
+        search_filter = '(&%s%s)' % (mail_filter, other_filter)
+
         rs = self.connection.search_s(
             "dc=mozilla",
             ldap.SCOPE_SUBTREE,
             search_filter,
-            attrs
+            self.attributes
         )
         for uid, result in rs:
             return dict(result)
@@ -107,12 +123,15 @@ class Employee(BaseView):
 @class_decorator(required_parameters('mail', 'cn'))
 class InGroup(BaseView):
 
-    def get(self, request):
+    def get(self, request, **search):
         cn = request.GET.get('cn')
         mail = request.GET.get('mail')
 
         # first, figure out the uid
-        search_filter = self.make_search_filter(dict(mail=mail))
+        mail_filter = self.make_search_filter(dict(mail=mail))
+        alias_filter = self.make_search_filter(dict(emailAlias=mail))
+        search_filter = '(|%s%s)' % (mail_filter, alias_filter)
+
         rs = self.connection.search_s(
             "dc=mozilla",
             ldap.SCOPE_SUBTREE,
