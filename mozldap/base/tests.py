@@ -60,20 +60,21 @@ class ViewsTestCase(TestCase):
         response = self.client.get(url, {'mail': 'peter@example.com'})
         eq_(response.status_code, 200)
         eq_('application/json; charset=UTF-8', response['Content-Type'])
-        eq_(json.dumps(result['abc123']).strip(), response.content.strip())
+        eq_(json.loads(response.content), True)
 
         response = self.client.get(url, {'mail': 'never@heard.of.com'})
         eq_(response.status_code, 200)
-        eq_(response.content, '{}')
+        eq_(json.loads(response.content), False)
 
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'hgaccountenabled': ''})
         eq_(response.status_code, 200)
-        eq_(response.content, '{}')
+        eq_(json.loads(response.content), False)
 
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'gender': 'male'})
         eq_(response.status_code, 200)
+        eq_(json.loads(response.content), True)
 
     def test_employee(self):
         url = reverse('employee')
@@ -99,12 +100,12 @@ class ViewsTestCase(TestCase):
         response = self.client.get(url, {'mail': 'peter@example.com'})
         eq_(response.status_code, 200)
         eq_('application/json; charset=UTF-8', response['Content-Type'])
-        eq_(json.dumps(result['abc123']).strip(), response.content.strip())
+        eq_(json.loads(response.content), True)
 
         response = self.client.get(url, {'mail': 'never@heard.of.com'})
         eq_(response.status_code, 200)
         eq_('application/json; charset=UTF-8', response['Content-Type'])
-        eq_(response.content, '{}')
+        eq_(json.loads(response.content), False)
 
     def test_general_page_not_found(self):
         response = self.client.get('/notexistingurl')
@@ -147,14 +148,14 @@ class ViewsTestCase(TestCase):
         response = self.client.get(url, {'mail': 'not@head.of.com',
                                          'cn': 'CrashStats'})
         eq_(response.status_code, 200)
-        eq_(response.content, '{}')
+        eq_(json.loads(response.content), False)
 
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'cn': 'CrashStats'})
         eq_(response.status_code, 200)
-        eq_(json.loads(response.content), {'group': 'OK'})
+        eq_(json.loads(response.content), True)
 
         response = self.client.get(url, {'mail': 'peter@example.com',
                                          'cn': 'NotInGroup'})
         eq_(response.status_code, 200)
-        eq_(response.content, '{}')
+        eq_(json.loads(response.content), False)

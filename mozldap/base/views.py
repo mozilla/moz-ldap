@@ -86,9 +86,9 @@ class Exists(BaseView):
             self.attributes
         )
         for uid, result in rs:
-            return dict(result)
+            return True
 
-        return {}
+        return False
 
 
 @class_decorator(json_view)
@@ -114,9 +114,9 @@ class Employee(BaseView):
             self.attributes
         )
         for uid, result in rs:
-            return dict(result)
+            return True
 
-        return {}
+        return False
 
 
 @class_decorator(json_view)
@@ -143,7 +143,7 @@ class InGroup(BaseView):
             break
 
         if not uid:
-            return {}
+            return False
 
         search_filter1 = self.make_search_filter(dict(cn=cn))
         search_filter2 = self.make_search_filter({
@@ -162,6 +162,6 @@ class InGroup(BaseView):
         )
 
         for __ in rs:
-            return {'group': 'OK'}
+            return True
 
-        return {}
+        return False
