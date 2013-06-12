@@ -71,3 +71,6 @@ JINGO_EXCLUDE_APPS = [
 # ]
 
 LOGGING = dict(loggers=dict(playdoh = {'level': logging.DEBUG}))
+
+# by default, no special options set up
+LDAP_GLOBAL_OPTIONS = {}
