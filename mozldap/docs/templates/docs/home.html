@@ -79,7 +79,7 @@
 
 
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script>
 $(function() {
 
@@ -97,10 +97,10 @@ $(function() {
     }
     var url;
     var query = '?mail=' + encodeURI(mail);
-    if ($('input[name="cn"]').val()) {
+    if ($('input[value="group"]:checked').size()) {
       url = '/in-group';
       query += '&cn=' + $('input[name="cn"]').val();
-    } else if ($('input[name="employee"]:checked').size()) {
+    } else if ($('input[value="employee"]:checked').size()) {
       url = '/employee';
     } else {
       url = '/exists';
