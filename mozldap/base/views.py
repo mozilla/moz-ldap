@@ -139,7 +139,8 @@ class InGroup(BaseView):
             ['uid']
         )
         uid = None
-        for uid, result in rs:
+        for __, result in rs:
+            uid = result['uid'][0]
             break
 
         if not uid:
