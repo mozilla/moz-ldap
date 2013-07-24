@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import ldap
-from ldap.filter import filter_format
+from ldap.filter import filter_format, escape_filter_chars
 from django import http
 from django.shortcuts import redirect
 from django.conf import settings
@@ -139,13 +139,15 @@ class InGroup(BaseView):
             ['uid']
         )
         uid = None
-        for __, result in rs:
+        for dn, result in rs:
             uid = result['uid'][0]
             break
 
         if not uid:
             return False
 
+        """
+        # the old way
         search_filter1 = self.make_search_filter(dict(cn=cn))
         search_filter2 = self.make_search_filter({
             'memberUID': [uid, mail],  # should that me 'memberuid' ??
@@ -154,6 +156,24 @@ class InGroup(BaseView):
                        'mail=%s,o=net,dc=mozilla' % mail],
         }, any_parameter=True)
         search_filter = '(&%s%s)' % (search_filter1, search_filter2)
+        """
+
+        # the new way (see https://bugzilla.mozilla.org/show_bug.cgi?id=875461)
+        search_filter = """
+        (|
+           (&(objectClass=groupOfNames)(cn=%(groupname)s)(member=%(dn)s))
+           (&(objectClass=posixGroup)(|(cn=scm_*)(cn=svn_*))(cn=%(groupname)s)(memberUid=%(mail)s))
+           (&(objectClass=posixGroup)(!(|(cn=scm_*)(cn=svn_*)))(cn=%(groupname)s)(memberUid=%(uid)s))
+        )
+        """
+
+        search_filter = search_filter % {
+            'groupname': escape_filter_chars(cn),
+            'dn': escape_filter_chars(dn),
+            'uid': escape_filter_chars(uid),
+            'mail': escape_filter_chars(mail),
+        }
+        search_filter = search_filter.strip()
 
         rs = self.connection.search_s(
             "ou=groups,dc=mozilla",
