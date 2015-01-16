@@ -8,5 +8,5 @@ from . import views
 
 
 urlpatterns = patterns('',
-    url(r'^$', views.home, name='docs-home'),
+    url(r'^/$', views.home, name='docs-home'),
 )
