@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, include
+from django.conf.urls import patterns, include
 
 from .base import urls as base_urls
 from .docs import urls as docs_urls
