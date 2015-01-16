@@ -21,7 +21,7 @@ def home(request):
 
 def handler404(request):
     # instead of django.views.defaults.page_not_found
-    return http.HttpResponseNotFound(request.path, mimetype='text/plain')
+    return http.HttpResponseNotFound(request.path, content_type='text/plain')
 
 
 #====================================================================

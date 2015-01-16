@@ -7,4 +7,13 @@ about users in LDAP by a straight forwards RESTful API.
 
 License
 -------
-MPL2 
+MPL2
+
+
+Running tests
+-------------
+
+You need to force a new DB every time since we're using sqlite's
+`:memory:`.
+
+    FORCE_DB=1 python manage.py test
